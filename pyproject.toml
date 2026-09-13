@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "amazon-capture"
+version = "0.1.0"
+description = "Read-only local capture of Amazon orders, packages, tracking, and payments."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = ["playwright>=1.54.0,<2"]
+
+[project.scripts]
+amazon-capture = "amazon_capture.capture:main"
+amazon-observations = "amazon_capture.observations:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["amazon_capture*"]
+
