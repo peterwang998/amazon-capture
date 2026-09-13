@@ -13,7 +13,7 @@ one package's tracking with a sibling merely because they share an order.
 
 Payments contain `target: "payments"`, `capturedAt`, and `records`, together with
 page and authentication/readiness metadata. Amount signs and original strings
-remain available; a capture alone does not establish a final order allocation.
+remain available as observed on the source page.
 
 The additive `schemaVersion: "amazon-capture/v1"` identifies newly emitted captures.
 Historical captures without this marker are accepted by the normalization API.
@@ -23,5 +23,9 @@ unknown fields, preserve raw values, and check coverage before inferring absence
 `normalize_captures` returns `schemaVersion: "amazon-observations/v0.1"`,
 `generatedAt`, `sourceCaptures`, `observations` and `coverage`. The observations
 object contains `orders`, `trackingPages`, and `payments` arrays. Identifiers and
-provenance connect each observation to its source. This layer does not deduplicate
-purchases across days or reconcile receiving/cashback; those are downstream tasks.
+provenance connect each observation to its source. Normalization preserves distinct observations across captures. Applications can
+use the identifiers, timestamps and provenance for their own processing.
+
+New captures describe automatic page probing with `historyAutoProbeMode` in
+`probePolicy`. This flag is descriptive; consumers should use the explicit probe
+limits and coverage fields when deciding whether a capture is complete.
