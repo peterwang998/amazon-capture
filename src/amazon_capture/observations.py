@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Normalize Amazon captures into local observations.
-
-The scraper writes raw local order, tracking, and payment evidence. This script
-reduces those captures into a smaller, reviewable contract that can inform a
-SQLite importer while preserving raw identifiers for local auditability.
-"""
+"""Normalize saved Amazon captures while preserving identifiers and provenance."""
 
 from __future__ import annotations
 
@@ -411,10 +406,10 @@ def default_output_path(output_dir: Path) -> Path:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Normalize Amazon bookkeeping captures.")
+    parser = argparse.ArgumentParser(description="Normalize Amazon order and payment captures.")
     parser.add_argument("captures", nargs="+", help="Amazon capture JSON paths.")
     parser.add_argument("--output", help="Output JSON path. Defaults under raw-captures/amazon-observations/.")
-    parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR), help="Default output directory.")
+    parser.add_argument("--output-dir", default=str(Path.cwd() / "raw-captures" / "amazon-observations"), help="Default output directory.")
     parser.add_argument("--stdout", action="store_true", help="Write normalized JSON to stdout instead of a file.")
     return parser.parse_args()
 

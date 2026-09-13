@@ -17,7 +17,7 @@ from amazon_capture.capture import (
     DISCOVERY_JS,
     PAYMENT_DISCOVERY_JS,
     RunLogger,
-    apply_bookkeeping_probe_defaults,
+    apply_history_probe_defaults,
     build_order_history_coverage,
     build_launch_options,
     chrome_launch_blocked_by_macos_sandbox,
@@ -467,7 +467,7 @@ class AmazonObservationTests(unittest.TestCase):
         self.assertEqual(normalize_pause_bounds(2600, 650), (2600, 2600))
         self.assertEqual(normalize_pause_bounds(-1, 0), (0, 0))
 
-    def test_bookkeeping_orders_run_auto_enables_uncapped_probes(self):
+    def test_history_orders_run_auto_enables_uncapped_probes(self):
         args = argparse.Namespace(
             target="orders",
             lookback_days=60,
@@ -479,9 +479,9 @@ class AmazonObservationTests(unittest.TestCase):
             max_order_detail_links=None,
         )
 
-        apply_bookkeeping_probe_defaults(args)
+        apply_history_probe_defaults(args)
 
-        self.assertTrue(args.bookkeeping_auto_probe_mode)
+        self.assertTrue(args.history_auto_probe_mode)
         self.assertTrue(args.capture_tracking_pages)
         self.assertTrue(args.capture_tracking_pages_auto_enabled)
         self.assertIsNone(args.max_tracking_links)
@@ -489,7 +489,7 @@ class AmazonObservationTests(unittest.TestCase):
         self.assertTrue(args.capture_order_detail_pages_auto_enabled)
         self.assertIsNone(args.max_order_detail_links)
 
-    def test_lookback_bookkeeping_run_uses_auto_page_depth_when_omitted(self):
+    def test_lookback_history_run_uses_auto_page_depth_when_omitted(self):
         args = argparse.Namespace(
             target="orders",
             lookback_days=60,
@@ -502,9 +502,9 @@ class AmazonObservationTests(unittest.TestCase):
             max_order_detail_links=None,
         )
 
-        apply_bookkeeping_probe_defaults(args)
+        apply_history_probe_defaults(args)
 
-        self.assertTrue(args.bookkeeping_auto_probe_mode)
+        self.assertTrue(args.history_auto_probe_mode)
         self.assertTrue(args.max_pages_auto)
 
     def test_small_tracking_run_keeps_interactive_probe_limit(self):
@@ -519,15 +519,15 @@ class AmazonObservationTests(unittest.TestCase):
             max_order_detail_links=None,
         )
 
-        apply_bookkeeping_probe_defaults(args)
+        apply_history_probe_defaults(args)
 
-        self.assertFalse(args.bookkeeping_auto_probe_mode)
+        self.assertFalse(args.history_auto_probe_mode)
         self.assertTrue(args.capture_tracking_pages)
         self.assertFalse(args.capture_tracking_pages_auto_enabled)
         self.assertEqual(args.max_tracking_links, 3)
         self.assertEqual(args.max_order_detail_links, 3)
 
-    def test_explicit_bookkeeping_probe_limit_is_honored(self):
+    def test_explicit_history_probe_limit_is_honored(self):
         args = argparse.Namespace(
             target="orders",
             lookback_days=60,
@@ -539,7 +539,7 @@ class AmazonObservationTests(unittest.TestCase):
             max_order_detail_links=12,
         )
 
-        apply_bookkeeping_probe_defaults(args)
+        apply_history_probe_defaults(args)
 
         self.assertTrue(args.capture_tracking_pages)
         self.assertEqual(args.max_tracking_links, 25)
