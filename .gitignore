@@ -1,0 +1,13 @@
+.venv/
+private/
+raw-captures/
+screenshots/
+logs/
+.env
+.env.*
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.DS_Store
