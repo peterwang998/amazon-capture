@@ -1,21 +1,20 @@
 # Amazon Capture
 
-Read-only local capture of Amazon order history, package items and quantities,
-tracking pages, order details, and payment activity. Runs independently of any
-ledger, bank scraper or receiving service.
+A local, read-only Python toolkit for capturing Amazon order history, package
+items and quantities, tracking details, and payment activity.
 
 ## Install
 
-Requires Python 3.11 or newer. Install the wheel from the GitHub release, or clone
-this repository and run:
+Requires Python 3.11 or newer. Install the wheel from the latest GitHub release,
+or clone this repository and run:
 
 ```sh
 python -m pip install .
 python -m playwright install chromium
 ```
 
-On macOS the collector uses installed Google Chrome when available. macOS is the
-currently validated platform; Chromium fallback is available on other systems.
+The collector uses installed Google Chrome on macOS when available and Chromium
+otherwise. The test suite runs on macOS and Linux.
 
 ## Capture
 
@@ -24,36 +23,44 @@ amazon-capture --target orders --lookback-days 30 --max-orders 200 --headed --st
 amazon-capture --target payments --max-orders 100 --headed --stop-on-security-prompt
 ```
 
-The first headed run allows you to sign in yourself using a private persistent
-browser profile. Security prompts are handled by the user. The collector does not
-place orders, cancel purchases, change payment methods, or submit account changes.
+On the first headed run, sign in through the browser window. Complete any
+security prompts yourself. Capture operations read the pages you can access.
 
-Defaults are relative to the current working directory: `raw-captures/` for JSON,
-`private/browser-profiles/` for browser state, and `logs/` for execution logs.
-Set `--profile-dir`, `--output-dir`, and `--log-dir` to override them. Existing
-integrations may provide `DROPSHIP_BROWSER_PROFILE_DIR` for a shared profile.
-Captures contain original order/payment identifiers and may include addresses.
-Keep runtime files private; do not commit or upload captures or browser profiles.
+Paths default to `raw-captures/`, `private/browser-profiles/`, `screenshots/`, and
+`logs/` beneath the current working directory. Override them with `--output-dir`,
+`--profile-dir`, `--screenshot-dir`, and `--log-dir`. Set
+`AMAZON_CAPTURE_PROFILE_DIR` to choose a default browser profile; an explicit
+`--profile-dir` takes precedence. Configuration is resolved for each invocation.
 
-Small interactive runs have bounded probes. A bookkeeping run with a lookback
-and larger order limit automatically follows package tracking/detail links and
-paginates toward the requested cutoff. Inspect coverage and truncation metadata
-instead of treating an absent row as a cancelled or missing order.
+Small interactive runs have bounded page probes. Larger order-history runs
+follow tracking and detail links and paginate toward the requested cutoff.
+Coverage metadata describes the pages and date range actually captured.
 
-## Output contract
+## Use from Python
 
-The last stdout JSON object identifies the capture `output` path, target, record
-counts, authentication state, and coverage. See [the capture contract](docs/contract.md).
-Normalize captured files without opening a browser:
+Normalize saved captures without launching a browser:
 
-```sh
-amazon-observations --help
+```python
+from pathlib import Path
+from amazon_capture.observations import load_capture, normalize_captures
+
+path = Path("raw-captures/orders.json")
+result = normalize_captures([(str(path), load_capture(path))])
 ```
 
-Python consumers can call `amazon_capture.observations.normalize_captures` with a
-sequence of `(source_path, capture_dict)` pairs. Each normalized result records
-`schemaVersion`, source provenance, observations and field coverage. Financial
-matching, order-history storage and P&L are responsibilities of the consuming app.
+The result contains `schemaVersion`, `sourceCaptures`, `observations`, and
+`coverage`. Original identifiers and source provenance remain available.
+See [the output contract](docs/contract.md) for details.
+
+## Modules
+
+- `config`: runtime directories and environment settings.
+- `page_scripts`: Amazon page extraction functions, independent of orchestration.
+- `capture`: browser navigation, pagination, page probes, and the capture CLI.
+- `observations`: normalization of saved captures and the observation CLI.
+- `quality`: validation of capture contents.
+
+The package depends only on Playwright and the Python standard library.
 
 ## Development
 
@@ -64,5 +71,5 @@ python -m pip install build
 python -m build
 ```
 
-Tests use synthetic records and local HTML fixtures only. The release workflow
-builds wheel and source archives after tests; real account data is never a fixture.
+Tests use synthetic records and local HTML fixtures. Release builds contain
+source, documentation, and those fixtures; runtime directories are excluded.
